@@ -51,12 +51,8 @@ struct AnalyzerIterator: IteratorProtocol {
 
 // Get the input
 let stdin = FileHandle.standardInput
-let inputData = stdin.readDataToEndOfFile()
-let input = String(data: inputData, encoding: .utf8)!
-
-// Clean and organize the input
-let shiftStrings = input.split(separator: "\n")
-let shifts = shiftStrings.map { Int($0)! }
+let reader = LineReader(handle: stdin)
+let shifts = reader.map { Int($0)! }
 
 // Run the frequencies
 var currentFrequency = 0
