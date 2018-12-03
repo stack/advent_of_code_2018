@@ -1,4 +1,5 @@
 import Foundation
+import LineReader
 
 class Analyzer {
     let shifts: [Int]
@@ -86,4 +87,3 @@ for shift in analyzer.lazy {
         visitedFrequencies.insert(currentFrequency)
     }
 }
-

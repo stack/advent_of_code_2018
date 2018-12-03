@@ -2,18 +2,18 @@ import Foundation
 
 fileprivate let ReadSize = 1024
 
-class LineReader {
+public class LineReader {
     let handle: FileHandle
     private var buffer: String
     private var eof: Bool
     
-    init(handle: FileHandle) {
+    public init(handle: FileHandle) {
         self.handle = handle
         buffer = ""
         eof = false
     }
     
-    func readLine(readMore: Bool = false) -> String? {
+    public func readLine(readMore: Bool = false) -> String? {
         // If the buffer is empty, read more
         if buffer.isEmpty || readMore {
             let data = handle.readData(ofLength: ReadSize)
@@ -53,7 +53,7 @@ class LineReader {
             } else {
                 buffer = String(results[1])
             }
-
+            
             return String(results[0])
         } else {
             fatalError("Results should be 1 or 2")
@@ -62,19 +62,19 @@ class LineReader {
 }
 
 extension LineReader: Sequence {
-    func makeIterator() -> LineReaderIterator {
+    public func makeIterator() -> LineReaderIterator {
         return LineReaderIterator(self)
     }
 }
 
-struct LineReaderIterator: IteratorProtocol {
+public struct LineReaderIterator: IteratorProtocol {
     private let reader: LineReader
     
     init(_ reader: LineReader) {
         self.reader = reader
     }
     
-    mutating func next() -> String? {
+    public mutating func next() -> String? {
         return reader.readLine()
     }
 }
