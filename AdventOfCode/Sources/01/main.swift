@@ -3,46 +3,58 @@ import LineReader
 
 class Analyzer {
     let shifts: [Int]
+    
+    init(shifts: [Int]) {
+        self.shifts = shifts
+    }
+    
+    func iterator(infinite: Bool = false) -> AnalyzerSequence {
+        return AnalyzerSequence(analyzer: self, infinite: infinite)
+    }
+}
+
+struct AnalyzerSequence {
+    let analyzer: Analyzer
     let infinite: Bool
     
-    init(shifts: [Int], infinite: Bool = false) {
-        self.shifts = shifts
+    init(analyzer: Analyzer, infinite: Bool) {
+        self.analyzer = analyzer
         self.infinite = infinite
     }
 }
 
-extension Analyzer: Sequence {
-    func makeIterator() -> AnalyzerIterator {
-        return AnalyzerIterator(self)
+extension AnalyzerSequence: Sequence {
+    func makeIterator() -> AnalyzerSequenceIterator {
+        return AnalyzerSequenceIterator(self)
     }
 }
 
-struct AnalyzerIterator: IteratorProtocol {
-    private let analyzer: Analyzer
+struct AnalyzerSequenceIterator: IteratorProtocol {
+    private let analyzerSequence: AnalyzerSequence
     private var head: Int
     
-    init(_ analyzer: Analyzer) {
-        self.analyzer = analyzer
+    init(_ analyzerSequence: AnalyzerSequence) {
+        self.analyzerSequence = analyzerSequence
         head = 0
     }
     
     mutating func next() -> Int? {
-        if analyzer.infinite {
-            let value = analyzer.shifts[head]
+        if analyzerSequence.infinite {
+            let value = analyzerSequence.analyzer.shifts[head]
             
             head += 1
             
-            if head >= analyzer.shifts.count {
+            if head >= analyzerSequence.analyzer.shifts.count {
                 head = 0
             }
             
             return value
         } else {
-            if head >= analyzer.shifts.count {
+            if head >= analyzerSequence.analyzer.shifts.count {
                 return nil
             }
             
-            let value = analyzer.shifts[head]
+            let value = analyzerSequence.analyzer.shifts[head]
             head += 1
             
             return value
@@ -59,7 +71,7 @@ let shifts = reader.map { Int($0)! }
 var currentFrequency = 0
 var analyzer = Analyzer(shifts: shifts)
 
-for shift in analyzer {
+for shift in analyzer.iterator() {
     let previousFrequency = currentFrequency
     currentFrequency += shift
     
@@ -71,10 +83,9 @@ print("\n-------------------------------------------------------------\n")
 
 // Find the repeating frequency
 var visitedFrequencies: Set<Int> = []
-analyzer = Analyzer(shifts: shifts, infinite: true)
 currentFrequency = 0
 
-for shift in analyzer.lazy {
+for shift in analyzer.iterator(infinite: true).lazy {
     let previousFrequency = currentFrequency
     currentFrequency += shift
     
