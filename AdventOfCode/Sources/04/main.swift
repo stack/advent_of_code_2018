@@ -51,6 +51,7 @@ var days: [Day] = []
 
 let dateFormatter = DateFormatter()
 dateFormatter.dateFormat = "yyyy-MM-dd"
+dateFormatter.timeZone = TimeZone(identifier: "GMT")!
 
 var oneDay = DateComponents()
 oneDay.day = 1
@@ -115,9 +116,13 @@ if let previousDay = day {
 }
 
 // Debug
+print("Days in order:")
 for day in days {
     print("\(day)")
 }
+
+print("\n--------\n")
+
 
 // Find the guard with the most sleep
 var totals: [Day:Int] = [:]
@@ -140,7 +145,11 @@ for day in days {
     }
 }
 
-print("Max Sleeper: \(maxSleepId) = \(maxSleep)")
+for (day, total) in totals {
+    print("Guard: \(day.guardID) -> \(total)")
+}
+
+print("\nMax Sleeper: \(maxSleepId) = \(maxSleep)")
 
 // Determine the minute the guard was asleep the most
 var dayEntries = days.filter { $0.guardID == maxSleepId }
@@ -170,3 +179,63 @@ for day in dayEntries {
 }
 
 print("Max minute: \(maxMinute) (\(maxTotal))")
+
+let finalGuardID = Int(maxSleepId)! * maxMinute
+print("#1 Guard ID: \(finalGuardID)")
+
+// Collect all of the sleep ranges per guard
+var allSleepsPerGuard: [String:[Range<Int>]] = [:]
+
+for day in days {
+    var ranges: [Range<Int>]
+    if let currentRange = allSleepsPerGuard[day.guardID] {
+        ranges = currentRange
+    } else {
+        ranges = []
+    }
+    
+    ranges.append(contentsOf: day.sleeps)
+    allSleepsPerGuard[day.guardID] = ranges
+}
+
+print("\nSleeps Per Guard:")
+for (guardID, sleeps) in allSleepsPerGuard {
+    print("\(guardID): \(sleeps)")
+}
+
+// Build heat maps for each guard to fill with their sleeps
+var sleepHeatMaps: [String:[Int]] = [:]
+
+var maxGuardID = ""
+var maxSleepTime = Int.min
+var maxSleepTimeCount = Int.min
+
+for (guardID, sleeps) in allSleepsPerGuard {
+    var heatMap = [Int](repeating: 0, count: 60)
+    
+    for sleep in sleeps {
+        for idx in sleep {
+            heatMap[idx] += 1
+            
+            if heatMap[idx] > maxSleepTimeCount {
+                maxGuardID = guardID
+                maxSleepTime = idx
+                maxSleepTimeCount = heatMap[idx]
+            }
+        }
+    }
+    
+    sleepHeatMaps[guardID] = heatMap
+}
+
+// Debug
+print("\nHeat Maps:")
+for (guardID, heatMap) in sleepHeatMaps {
+    let id = guardID.padding(toLength: 4, withPad: " ", startingAt: 0)
+    print("\(id): \(heatMap)")
+}
+
+print("\n#2 Max Sleep Guard: \(maxGuardID) -> \(maxSleepTime)")
+
+let maxSleepID = Int(maxGuardID)! * maxSleepTime
+print("#2 Max Sleep ID: \(maxSleepID)")
