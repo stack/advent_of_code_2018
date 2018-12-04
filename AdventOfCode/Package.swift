@@ -6,6 +6,7 @@ import PackageDescription
 let package = Package(
     name: "AdventOfCode",
     dependencies: [
+        .package(path: "../Canvas"),
         .package(path: "../LineReader"),
     ],
     targets: [
@@ -20,6 +21,6 @@ let package = Package(
             dependencies: ["LineReader"]),
         .target(
             name: "04",
-            dependencies: ["LineReader"]),
+            dependencies: ["Canvas", "LineReader"]),
     ]
 )

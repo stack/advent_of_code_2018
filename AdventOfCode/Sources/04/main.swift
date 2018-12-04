@@ -1,3 +1,4 @@
+import Canvas
 import Foundation
 import LineReader
 
@@ -178,6 +179,7 @@ for day in dayEntries {
     }
 }
 
+// Result #1
 print("Max minute: \(maxMinute) (\(maxTotal))")
 
 let finalGuardID = Int(maxSleepId)! * maxMinute
@@ -235,7 +237,80 @@ for (guardID, heatMap) in sleepHeatMaps {
     print("\(id): \(heatMap)")
 }
 
+// Result #2
 print("\n#2 Max Sleep Guard: \(maxGuardID) -> \(maxSleepTime)")
 
 let maxSleepID = Int(maxGuardID)! * maxSleepTime
 print("#2 Max Sleep ID: \(maxSleepID)")
+
+// Draw the heatmap
+let fontSize: CGFloat = 11.0
+let labelWidth: CGFloat = 40.0
+let squareSize: CGFloat = 16.0
+
+let canvasWidth: CGFloat = (squareSize * 60.0) + labelWidth
+let canvasHeight: CGFloat = squareSize * CGFloat(sleepHeatMaps.keys.count)
+
+let maxColorValue: CGFloat = CGFloat(maxSleepTimeCount)
+
+let canvas = Canvas(width: Int(canvasWidth), height: Int(canvasHeight))
+canvas.draw { (ctx) in
+    let fullRect = CGRect(x: 0.0, y: 0.0, width: canvasWidth, height: canvasHeight)
+    ctx.addRect(fullRect)
+    ctx.setFillColor(CGColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0))
+    ctx.fillPath()
+    
+    for (idx, guardID) in sleepHeatMaps.keys.sorted().enumerated() {
+        let heatMap = sleepHeatMaps[guardID]!
+        
+        let y = squareSize * CGFloat(idx)
+        
+        // Draw the ID
+        let font = CTFontCreateWithName("Menlo-Regular" as CFString, fontSize, nil)
+        let attributes = [kCTFontAttributeName:font] as CFDictionary
+        
+        let fontRect = CTFontGetBoundingBox(font)
+        let midHeight = (squareSize / 2.0) - (fontRect.height / 2.0)
+        
+        let path = CGMutablePath()
+        path.addRect(CGRect(x: 4.0, y: y + midHeight, width: labelWidth, height: fontRect.height))
+        
+        let string = CFAttributedStringCreate(kCFAllocatorDefault, guardID as CFString, attributes)!
+        let frameSetter = CTFramesetterCreateWithAttributedString(string)
+        let frame = CTFramesetterCreateFrame(frameSetter, CFRangeMake(0, guardID.count), path, nil)
+        
+        CTFrameDraw(frame, ctx)
+        
+        for xOffset in 0 ..< 60 {
+            let x = (squareSize * CGFloat(xOffset)) + labelWidth
+            
+            let color: CGColor
+            if heatMap[xOffset] == maxSleepTimeCount {
+                color = CGColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+            } else {
+                let redValue: CGFloat = 1.0
+                let greenValue: CGFloat = CGFloat(heatMap[xOffset]) / maxColorValue
+                let blueValue: CGFloat = CGFloat(heatMap[xOffset]) / maxColorValue
+                
+                color = CGColor(red: redValue, green: greenValue, blue: blueValue, alpha: 1.0)
+            }
+            
+            let rect = CGRect(x: x, y: y, width: squareSize, height: squareSize)
+            ctx.addRect(rect)
+            ctx.setFillColor(color)
+            
+            ctx.fillPath()
+            
+            if heatMap[xOffset] == maxSleepTimeCount {
+                let strokeColor = CGColor(red: 1.0, green: 1.0, blue: 0.0, alpha: 1.0)
+                
+                ctx.addRect(rect)
+                ctx.setLineWidth(3.0)
+                ctx.setStrokeColor(strokeColor)
+                ctx.strokePath()
+            }
+        }
+    }
+}
+
+canvas.save(path: "./04-heat-map.png")
