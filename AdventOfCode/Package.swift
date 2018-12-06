@@ -25,5 +25,8 @@ let package = Package(
         .target(
             name: "05",
             dependencies: ["LineReader"]),
+        .target(
+            name: "06",
+            dependencies: ["LineReader"]),
     ]
 )
