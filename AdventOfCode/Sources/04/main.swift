@@ -254,7 +254,7 @@ let canvasHeight: CGFloat = squareSize * CGFloat(sleepHeatMaps.keys.count)
 let maxColorValue: CGFloat = CGFloat(maxSleepTimeCount)
 
 let canvas = Canvas(width: Int(canvasWidth), height: Int(canvasHeight))
-canvas.draw { (ctx) in
+canvas.draw { (ctx, canvas) in
     let fullRect = CGRect(x: 0.0, y: 0.0, width: canvasWidth, height: canvasHeight)
     ctx.addRect(fullRect)
     ctx.setFillColor(CGColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0))
@@ -280,6 +280,9 @@ canvas.draw { (ctx) in
         let frame = CTFramesetterCreateFrame(frameSetter, CFRangeMake(0, guardID.count), path, nil)
         
         CTFrameDraw(frame, ctx)
+        
+        ctx.saveGState()
+        
         
         for xOffset in 0 ..< 60 {
             let x = (squareSize * CGFloat(xOffset)) + labelWidth
@@ -310,6 +313,8 @@ canvas.draw { (ctx) in
                 ctx.strokePath()
             }
         }
+        
+        ctx.restoreGState()
     }
 }
 

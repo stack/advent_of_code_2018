@@ -6,6 +6,7 @@ import PackageDescription
 let package = Package(
     name: "AdventOfCode",
     dependencies: [
+        .package(path: "../Animator"),
         .package(path: "../Canvas"),
         .package(path: "../ColorGenerator"),
         .package(path: "../LineReader"),
@@ -28,6 +29,6 @@ let package = Package(
             dependencies: ["LineReader"]),
         .target(
             name: "06",
-            dependencies: ["Canvas", "ColorGenerator", "LineReader"]),
+            dependencies: ["Animator", "Canvas", "ColorGenerator", "LineReader"]),
     ]
 )

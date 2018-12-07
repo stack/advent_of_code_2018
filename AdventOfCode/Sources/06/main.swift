@@ -1,3 +1,4 @@
+import Animator
 import Canvas
 import ColorGenerator
 import Foundation
@@ -18,6 +19,9 @@ extension Point: CustomStringConvertible {
         return "\(id): (\(x), \(y))"
     }
 }
+
+// Should we draw
+let draw = CommandLine.arguments.count > 1 && CommandLine.arguments[1] == "draw"
 
 // Get the input
 let stdin = FileHandle.standardInput
@@ -189,17 +193,24 @@ for x in (minX) ... (maxX) {
 
 print("Safe points: \(safePoints.count)")
 
+// Resume?
+guard draw else {
+    exit(EXIT_SUCCESS)
+}
+
 // Drawing: Part 1
-let squareSize: CGFloat = 16.0
-let canvasWidth = Int(squareSize * CGFloat(width))
-let canvasHeight = Int(squareSize * CGFloat(height))
+var squareSize: CGFloat = 16.0
+var canvasWidth = Int(squareSize * CGFloat(width))
+var canvasHeight = Int(squareSize * CGFloat(height))
 
 let colorGenerator = ColorGenerator(maxColors: points.count, saturationValue: 0.8)
 let colors = box.map { (_) -> CGColor in colorGenerator.makeNextColor() }
 let blankColor = CGColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 1.0)
 
 let canvas = Canvas(width: canvasWidth, height: canvasHeight)
-canvas.draw { (ctx) in
+canvas.draw { (ctx,canvas) in
+    canvas.invert()
+    
     for (y, row) in box.enumerated() {
         for (x, value) in row.enumerated() {
             let rect = CGRect(x: CGFloat(x) * squareSize, y: CGFloat(y) * squareSize, width: squareSize, height: squareSize)
@@ -223,3 +234,65 @@ canvas.draw { (ctx) in
 }
 
 canvas.save(path: "./06-part-1.png")
+
+// Drawing: Part 2
+squareSize = (points.count == 6) ? 16.0 : 2.0
+let halfSquareSize = squareSize / 2.0
+canvasWidth = Int(squareSize * CGFloat(width))
+canvasHeight = Int(squareSize * CGFloat(height))
+
+let animator = Animator(name: "06-part-2", width: canvasWidth, height: canvasHeight, rate: "5")
+
+var animatorBox: [[Int]] = []
+for _ in 0 ..< height {
+    animatorBox.append([Int](repeating: -1, count: width))
+}
+
+let animatorSafeDistance = (points.count == 6) ? 32 : 10000
+
+for x in (minX) ... (maxX) {
+    for y in (minY) ... (maxY) {
+        let currentPoint = Point(id: -1, x: x, y: y)
+        let totalDistance = points.reduce(0) { $0 + ($1 - currentPoint) }
+        
+        if totalDistance < animatorSafeDistance {
+            animatorBox[y][x] = totalDistance
+        }
+        
+        animator.draw { (ctx, canvas) in
+            canvas.invert()
+            
+            let fullRect = CGRect(x: 0.0, y: 0.0, width: CGFloat(width) * squareSize, height: CGFloat(height) * squareSize)
+            
+            let fullColor = CGColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 1.0)
+            ctx.setFillColor(fullColor)
+            ctx.fill(fullRect)
+            
+            for (canvasY, row) in animatorBox.enumerated() {
+                for (canvasX, value) in row.enumerated() {
+                    if value >= 0 {
+                        let rect = CGRect(x: CGFloat(canvasX) * squareSize, y: CGFloat(canvasY) * squareSize, width: squareSize, height: squareSize)
+                        
+                        let color = CGColor(red: 1.0, green: 0.0, blue: 0.0, alpha: 1.0)
+                        ctx.setFillColor(color)
+                        ctx.fill(rect)
+                    }
+                }
+            }
+            
+            for point in points {
+                ctx.move(to: CGPoint(x: (CGFloat(point.x) * squareSize) + halfSquareSize, y: (CGFloat(point.y) * squareSize) + halfSquareSize))
+                ctx.addLine(to: CGPoint(x: (CGFloat(x) * squareSize) + halfSquareSize, y: (CGFloat(y) * squareSize) + halfSquareSize))
+                
+                let color = CGColor(red: 1.0, green: 1.0, blue: 0.0, alpha: 1.0)
+                ctx.setStrokeColor(color)
+                ctx.strokePath()
+            }
+        }
+        
+        animator.snap()
+    }
+}
+
+animator.finalize()
+animator.cleanup()
