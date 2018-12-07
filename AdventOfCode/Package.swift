@@ -30,5 +30,8 @@ let package = Package(
         .target(
             name: "06",
             dependencies: ["Animator", "Canvas", "ColorGenerator", "LineReader"]),
+        .target(
+            name: "07",
+            dependencies: ["LineReader"]),
     ]
 )
