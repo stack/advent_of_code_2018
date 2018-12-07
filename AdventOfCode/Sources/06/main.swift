@@ -21,7 +21,7 @@ extension Point: CustomStringConvertible {
 let stdin = FileHandle.standardInput
 let reader = LineReader(handle: stdin)
 
-let regex = try! NSRegularExpression(pattern: "(\\d+).+(\\d+)", options: [])
+let regex = try! NSRegularExpression(pattern: "(\\d+), (\\d+)", options: [])
 let points = reader.enumerated().map { (idx, line) -> Point in
     guard let match = regex.firstMatch(in: line, options: [], range: NSRange(location: 0, length: line.count)) else {
         fatalError("Invalid input")
@@ -63,15 +63,11 @@ for point in points {
 }
 
 // Increment to allow one row of space
-minX -= 1
-minY -= 1
-maxX += 1
-maxY += 1
 
-let width = (maxX - minX) + 1
-let height = (maxY - minY) + 1
+let width = maxX + 1
+let height = maxY + 1
 
-print("Bounds: \(minX), \(minY) - \(maxX), \(maxY) - \(width)x\(height) ")
+print("Bounds: \(minX) \(minY), \(maxX), \(maxY) - \(width)x\(height) ")
 
 // Build a box of coordinates
 var box: [[Int]] = [[Int]]()
@@ -81,7 +77,7 @@ for boxY in 0 ..< height {
     
     for boxX in 0 ..< width {
         // Determine the point the box coordinates actually represent
-        let boxPoint = Point(id: Int.min, x: boxX - minX, y: boxY - minY)
+        let boxPoint = Point(id: Int.min, x: boxX, y: boxY)
         
         // Find the closest points to this coordinate
         var closestDistance = Int.max
@@ -111,9 +107,14 @@ func printBox(_ box: [[Int]]) {
     for row in box {
         let values = row.map { (value) -> String in
             if value == -1 {
-                return ".."
+                return " . "
             } else {
-                return String(value).padding(toLength: 2, withPad: " ", startingAt: 0)
+                var id = String(value)
+                while id.count < 2 {
+                    id = " " + id
+                }
+                
+                return id + " "
             }
         }
         
@@ -121,4 +122,67 @@ func printBox(_ box: [[Int]]) {
     }
 }
 
+print()
 printBox(box)
+print()
+
+// Determine which IDs are infinite
+var inifinites: Set<Int> = []
+
+inifinites.formUnion(box.first!)
+inifinites.formUnion(box.last!)
+
+for row in box {
+    inifinites.insert(row.first!)
+    inifinites.insert(row.last!)
+}
+
+print("Infinites: \(inifinites)")
+
+// Calculate the greatest area
+var areas: [Int:Int] = [:]
+
+for row in box {
+    for value in row {
+        guard !inifinites.contains(value) else {
+            continue
+        }
+        
+        let newArea: Int
+        
+        if let area = areas[value] {
+            newArea = area + 1
+        } else {
+            newArea = 1
+        }
+        
+        areas[value] = newArea
+    }
+}
+
+print("Areas: \(areas)")
+
+let (maxKey, maxValue) = areas.max { (lhs, rhs) -> Bool in
+    return lhs.value < rhs.value
+}!
+
+print("Max area: \(maxKey) = \(maxValue)")
+
+// Part 2: Just iterate the points, finding the safe distance
+let safeDistance = (points.count == 6) ? 32 : 10000
+var safePoints: [Point] = []
+
+print("Safe distance: \(safeDistance)")
+
+for x in (minX) ... (maxX) {
+    for y in (minY) ... (maxY) {
+        let currentPoint = Point(id: -1, x: x, y: y)
+        let totalDistance = points.reduce(0) { $0 + ($1 - currentPoint) }
+        
+        if totalDistance < safeDistance {
+            safePoints.append(currentPoint)
+        }
+    }
+}
+
+print("Safe points: \(safePoints.count)")
