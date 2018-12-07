@@ -27,6 +27,6 @@ let package = Package(
             dependencies: ["LineReader"]),
         .target(
             name: "06",
-            dependencies: ["LineReader"]),
+            dependencies: ["Canvas", "LineReader"]),
     ]
 )
