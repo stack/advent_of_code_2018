@@ -1,12 +1,12 @@
 import XCTest
-@testable import ColorGenerator
+@testable import Utilities
 
-final class ColorGeneratorTests: XCTestCase {
+final class UtilitiesTests: XCTestCase {
     func testExample() {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct
         // results.
-        XCTAssertEqual(ColorGenerator().text, "Hello, World!")
+        XCTAssertEqual(Utilities().text, "Hello, World!")
     }
 
     static var allTests = [

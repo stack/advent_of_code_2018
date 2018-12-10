@@ -6,38 +6,35 @@ import PackageDescription
 let package = Package(
     name: "AdventOfCode",
     dependencies: [
-        .package(path: "../Animator"),
-        .package(path: "../Canvas"),
-        .package(path: "../ColorGenerator"),
-        .package(path: "../LineReader"),
+        .package(path: "../Utilities"),
     ],
     targets: [
         .target(
             name: "01",
-            dependencies: ["LineReader"]),
+            dependencies: ["Utilities"]),
         .target(
             name: "02",
-            dependencies: ["LineReader"]),
+            dependencies: ["Utilities"]),
         .target(
             name: "03",
-            dependencies: ["LineReader"]),
+            dependencies: ["Utilities"]),
         .target(
             name: "04",
-            dependencies: ["Canvas", "LineReader"]),
+            dependencies: ["Utilities"]),
         .target(
             name: "05",
-            dependencies: ["LineReader"]),
+            dependencies: ["Utilities"]),
         .target(
             name: "06",
-            dependencies: ["Animator", "Canvas", "ColorGenerator", "LineReader"]),
+            dependencies: ["Utilities"]),
         .target(
             name: "07",
-            dependencies: ["LineReader"]),
+            dependencies: ["Utilities"]),
         .target(
             name: "08",
-            dependencies: ["LineReader"]),
+            dependencies: ["Utilities"]),
         .target(
             name: "09",
-            dependencies: []),
+            dependencies: ["Utilities"]),
     ]
 )

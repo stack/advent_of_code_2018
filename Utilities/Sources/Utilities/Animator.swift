@@ -1,4 +1,3 @@
-import Canvas
 import Foundation
 
 public class Animator {

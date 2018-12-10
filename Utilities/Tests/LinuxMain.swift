@@ -1,7 +1,7 @@
 import XCTest
 
-import AnimatorTests
+import UtilitiesTests
 
 var tests = [XCTestCaseEntry]()
-tests += AnimatorTests.allTests()
+tests += UtilitiesTests.allTests()
 XCTMain(tests)
