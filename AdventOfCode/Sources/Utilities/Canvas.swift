@@ -9,6 +9,8 @@ public class Canvas {
     let width: Int
     let height: Int
     
+    var blankColor: CGColor
+    
     public init(width: Int, height: Int) {
         self.width = width
         self.height = height
@@ -17,6 +19,19 @@ public class Canvas {
         let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue)
         
         context = CGContext.init(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0, space: colorSpace, bitmapInfo: bitmapInfo.rawValue)!
+        
+        blankColor = CGColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 1.0)
+    }
+    
+    public func blank() {
+        context.saveGState()
+        
+        let rect = CGRect(x: 0.0, y: 0.0, width: CGFloat(width), height: CGFloat(height))
+        
+        context.setFillColor(blankColor)
+        context.fill(rect)
+        
+        context.restoreGState()
     }
     
     public func draw(_ drawFunction: (CGContext, Canvas) -> ()) {

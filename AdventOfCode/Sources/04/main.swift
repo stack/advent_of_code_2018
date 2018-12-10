@@ -1,6 +1,5 @@
-import Canvas
 import Foundation
-import LineReader
+import Utilities
 
 struct Day {
     let guardID: String

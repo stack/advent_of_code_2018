@@ -1,5 +1,5 @@
 import Foundation
-import LineReader
+import Utilities
 
 class Analyzer {
     let shifts: [Int]

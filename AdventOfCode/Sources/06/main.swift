@@ -1,8 +1,5 @@
-import Animator
-import Canvas
-import ColorGenerator
 import Foundation
-import LineReader
+import Utilities
 
 struct Point {
     let id: Int

@@ -1,5 +1,5 @@
 import Foundation
-import LineReader
+import Utilities
 
 // Get the input
 let stdin = FileHandle.standardInput

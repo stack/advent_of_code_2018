@@ -5,9 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "AdventOfCode",
-    dependencies: [
-        .package(path: "../Utilities"),
-    ],
+    dependencies: [],
     targets: [
         .target(
             name: "01",
@@ -35,6 +33,13 @@ let package = Package(
             dependencies: ["Utilities"]),
         .target(
             name: "09",
+            dependencies: ["Utilities"]),
+        .target(
+            name: "10",
+            dependencies: ["Utilities"]),
+        .target(name: "Utilities"),
+        .testTarget(
+            name: "UtilitiesTests",
             dependencies: ["Utilities"]),
     ]
 )

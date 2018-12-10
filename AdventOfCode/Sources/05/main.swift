@@ -1,5 +1,5 @@
 import Foundation
-import LineReader
+import Utilities
 
 infix operator >-<
 

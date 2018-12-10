@@ -1,5 +1,5 @@
 import Foundation
-import LineReader
+import Utilities
 
 let SquareRegex = try! NSRegularExpression(pattern: "#(\\d+) @ (\\d+),(\\d+): (\\d+)x(\\d+)")
 
