@@ -8,34 +8,37 @@ let package = Package(
     dependencies: [],
     targets: [
         .target(
-            name: "01",
+            name: "Day01",
             dependencies: ["Utilities"]),
         .target(
-            name: "02",
+            name: "Day02",
             dependencies: ["Utilities"]),
         .target(
-            name: "03",
+            name: "Day03",
             dependencies: ["Utilities"]),
         .target(
-            name: "04",
+            name: "Day04",
             dependencies: ["Utilities"]),
         .target(
-            name: "05",
+            name: "Day05",
             dependencies: ["Utilities"]),
         .target(
-            name: "06",
+            name: "Day06",
             dependencies: ["Utilities"]),
         .target(
-            name: "07",
+            name: "Day07",
             dependencies: ["Utilities"]),
         .target(
-            name: "08",
+            name: "Day08",
             dependencies: ["Utilities"]),
         .target(
-            name: "09",
+            name: "Day09",
             dependencies: ["Utilities"]),
         .target(
-            name: "10",
+            name: "Day10",
+            dependencies: ["Utilities"]),
+        .target(
+            name: "Day11",
             dependencies: ["Utilities"]),
         .target(name: "Utilities"),
         .testTarget(
