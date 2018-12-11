@@ -44,6 +44,26 @@ struct Board {
         return totalPower
     }
     
+    func largestTotalPowerSized() -> (x: Int, y: Int, s: Int, p: Int) {
+        var largestSize = -1
+        var largestX = -1
+        var largestY = -1
+        var largestPower = Int.min
+        
+        for size in 1 ... 300 {
+            let largest = largestTotalPower(of: size)
+            
+            if largest.p > largestPower {
+                largestSize = size
+                largestX = largest.x
+                largestY = largest.y
+                largestPower = largest.p
+            }
+        }
+        
+        return (x: largestX, y: largestY, s: largestSize, p: largestPower)
+    }
+    
     func largestTotalPower(of size: Int) -> (x: Int, y: Int, p: Int) {
         var largestX = -1
         var largestY = -1
@@ -137,24 +157,27 @@ assert(largest.x == 21)
 assert(largest.y == 61)
 assert(largest.p == 30)
 
-/*
-
 // Largest Total Power Testing
-var largestTotalTuple = largestSize(serial: 18)
+board = Board(serial: 18)
+var largestTotalTuple = board.largestTotalPowerSized()
 assert(largestTotalTuple.x == 90)
 assert(largestTotalTuple.y == 269)
 assert(largestTotalTuple.s == 9)
 assert(largestTotalTuple.p == 113)
 
-largestTotalTuple = largestSize(serial: 42)
+board = Board(serial: 42)
+largestTotalTuple = board.largestTotalPowerSized()
 assert(largestTotalTuple.x == 232)
 assert(largestTotalTuple.y == 251)
 assert(largestTotalTuple.s == 12)
 assert(largestTotalTuple.p == 119)
- */
 
 // Part 1:
 board = Board(serial: serialNumber)
 largest = board.largestTotalPower(of: 3)
 print("Part 1: (\(largest.x), \(largest.y)) = \(largest.p)")
 
+// Part2:
+board = Board(serial: serialNumber)
+largestTotalTuple = board.largestTotalPowerSized()
+print("Part 2: (\(largestTotalTuple.x), \(largestTotalTuple.y)) @ \(largestTotalTuple.s) = \(largest.p)")
