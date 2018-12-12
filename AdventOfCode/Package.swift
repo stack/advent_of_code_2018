@@ -40,6 +40,9 @@ let package = Package(
         .target(
             name: "Day11",
             dependencies: ["Utilities"]),
+        .target(
+            name: "Day12",
+            dependencies: ["Utilities"]),
         .target(name: "Utilities"),
         .testTarget(
             name: "UtilitiesTests",
