@@ -11,6 +11,8 @@ public class Animator {
     var directory: URL
     var frame: Int
     
+    var backgroundImage: CGImage?
+    
     public init(name: String, width: Int, height: Int, rate: String) {
         self.name = name
         self.width = width
@@ -31,7 +33,16 @@ public class Animator {
     }
     
     public func draw(_ drawFunction: (CGContext, Canvas) -> ()) {
+        if let image = backgroundImage {
+            canvas.draw(image: image)
+        }
+        
         canvas.draw(drawFunction)
+    }
+    
+    public func drawBackground(_ drawFunction: (CGContext, Canvas) -> ()) {
+        canvas.draw(drawFunction)
+        backgroundImage = canvas.currentImage()
     }
     
     public func finalize() {

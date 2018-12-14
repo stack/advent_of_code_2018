@@ -34,9 +34,22 @@ public class Canvas {
         context.restoreGState()
     }
     
+    public func currentImage() -> CGImage {
+        return context.makeImage()!
+    }
+    
     public func draw(_ drawFunction: (CGContext, Canvas) -> ()) {
         context.saveGState()
         drawFunction(context, self)
+        context.restoreGState()
+    }
+    
+    public func draw(image: CGImage) {
+        context.saveGState()
+        
+        let rect = CGRect(x: 0.0, y: 0.0, width: CGFloat(width), height: CGFloat(height))
+        context.draw(image, in: rect)
+        
         context.restoreGState()
     }
     

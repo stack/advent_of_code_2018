@@ -184,14 +184,146 @@ class Course {
     let spaces: [[Space]]
     let carts: [Cart]
     var printRuns: Bool
+    var drawRuns: Bool
     
-    init(spaces: [[Space]], carts: [Cart], printRuns: Bool = false) {
+    init(spaces: [[Space]], carts: [Cart], printRuns: Bool = false, drawRuns: Bool = false) {
         self.spaces = spaces
         self.carts = carts
         self.printRuns = printRuns
+        self.drawRuns = drawRuns
+    }
+    
+    private func drawBackground(ctx: CGContext, canvas: Canvas, squareSize: CGFloat) {
+        canvas.invert()
+        
+        let backgroundColor = CGColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 1.0)
+        let trackColor = CGColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        let intersectionColor = CGColor(red: 0.6, green: 0.6, blue: 0.6, alpha: 1.0)
+        
+        for (y, row) in spaces.enumerated() {
+            for (x, value) in row.enumerated() {
+                let rect = CGRect(x: CGFloat(x) * squareSize, y: CGFloat(y) * squareSize, width: squareSize, height: squareSize)
+                
+                ctx.saveGState()
+                
+                ctx.setFillColor(backgroundColor)
+                ctx.fill(rect)
+                
+                switch value {
+                case .blank:
+                    ctx.setFillColor(backgroundColor)
+                    ctx.fill(rect)
+                case .curveLeft, .curveRight:
+                    fatalError("Cannot draw incomplete curve")
+                case .curveNE:
+                    let point = CGPoint(x: rect.maxX, y: rect.minY)
+                    
+                    ctx.beginPath()
+                    ctx.addArc(center: point, radius: squareSize, startAngle: .pi / 2.0, endAngle: .pi, clockwise: false)
+                    ctx.addLine(to: point)
+                    ctx.closePath()
+                    
+                    ctx.setFillColor(trackColor)
+                    ctx.fillPath()
+                case .curveNW:
+                    let point = CGPoint(x: rect.minX, y: rect.minY)
+                    
+                    ctx.beginPath()
+                    ctx.addArc(center: point, radius: squareSize, startAngle: 0, endAngle: .pi / 2.0, clockwise: false)
+                    ctx.addLine(to: point)
+                    ctx.closePath()
+                    
+                    ctx.setFillColor(trackColor)
+                    ctx.fillPath()
+                case .curveSE:
+                    let point = CGPoint(x: rect.maxX, y: rect.maxY)
+                    
+                    ctx.beginPath()
+                    ctx.addArc(center: point, radius: squareSize, startAngle: .pi, endAngle: .pi * 1.5, clockwise: false)
+                    ctx.addLine(to: point)
+                    ctx.closePath()
+                    
+                    ctx.setFillColor(trackColor)
+                    ctx.fillPath()
+                case .curveSW:
+                    let point = CGPoint(x: rect.minX, y: rect.maxY)
+                    
+                    ctx.beginPath()
+                    ctx.addArc(center: point, radius: squareSize, startAngle: .pi * 1.5, endAngle: .pi * 2.0, clockwise: false)
+                    ctx.addLine(to: point)
+                    ctx.closePath()
+                    
+                    ctx.setFillColor(trackColor)
+                    ctx.fillPath()
+                case .intersection:
+                    ctx.setFillColor(trackColor)
+                    ctx.fill(rect)
+                    
+                    ctx.move(to: CGPoint(x: rect.midX, y: rect.minY))
+                    ctx.addLine(to: CGPoint(x: rect.midX, y: rect.maxY))
+                    ctx.move(to: CGPoint(x: rect.minX, y: rect.midY))
+                    ctx.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
+                    
+                    ctx.setStrokeColor(intersectionColor)
+                    ctx.setLineWidth(1.0)
+                    ctx.strokePath()
+                case .straightEW, .straightNS:
+                    ctx.setFillColor(trackColor)
+                    ctx.fill(rect)
+                }
+                
+                ctx.restoreGState()
+            }
+        }
+    }
+    
+    private func drawCarts(ctx: CGContext, canvas: Canvas, squareSize: CGFloat, carts: [Cart]) {
+        canvas.invert()
+        
+        let cartColor = CGColor(red: 1.0, green: 0.0, blue: 0.0, alpha: 1.0)
+        for cart in carts {
+            let rect = CGRect(x: CGFloat(cart.x) * squareSize, y: CGFloat(cart.y) * squareSize, width: squareSize, height: squareSize)
+            
+            ctx.beginPath()
+            
+            switch cart.direction {
+            case .north:
+                ctx.move(to: CGPoint(x: rect.midX, y: rect.minY))
+                ctx.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+                ctx.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+            case .south:
+                ctx.move(to: CGPoint(x: rect.midX, y: rect.maxY))
+                ctx.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+                ctx.addLine(to: CGPoint(x: rect.minX, y: rect.minY))
+            case .east:
+                ctx.move(to: CGPoint(x: rect.maxX, y: rect.midY))
+                ctx.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+                ctx.addLine(to: CGPoint(x: rect.minX, y: rect.minY))
+            case .west:
+                ctx.move(to: CGPoint(x: rect.minX, y: rect.midY))
+                ctx.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
+                ctx.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+            }
+            
+            ctx.closePath()
+            ctx.setFillColor(cartColor)
+            ctx.fillPath()
+        }
     }
     
     func firstCollision() -> (x: Int, y: Int) {
+        var animator: Animator? = nil
+        
+        let squareSize: CGFloat = 8.0
+        
+        if drawRuns {
+            let width = Int(squareSize) * spaces[0].count
+            let height = Int(squareSize) * spaces.count
+            
+            animator = Animator(name: "13-first-collision", width: width, height: height, rate: "30")
+            animator?.drawBackground({ (ctx, canvas) in drawBackground(ctx: ctx, canvas: canvas, squareSize: squareSize) })
+        }
+        
         var run = 0
         var currentCarts = carts
         
@@ -201,6 +333,9 @@ class Course {
                 printTrack(carts: currentCarts)
                 print()
             }
+            
+            animator?.draw { (ctx, canvas) in drawCarts(ctx: ctx, canvas: canvas, squareSize: squareSize, carts: currentCarts) }
+            animator?.snap()
             
             // Sort the carts and move them, looking for the first collision
             currentCarts.sort()
@@ -213,6 +348,9 @@ class Course {
                     let rhs = currentCarts[collisionIdx + 1]
                     
                     if lhs.x == rhs.x && lhs.y == rhs.y {
+                        animator?.finalize()
+                        animator?.cleanup()
+                        
                         return (x: lhs.x, y: lhs.y)
                     }
                 }
@@ -223,6 +361,18 @@ class Course {
     }
     
     func lastCart() -> (x: Int, y: Int) {
+        var animator: Animator? = nil
+        
+        let squareSize: CGFloat = 8.0
+        
+        if drawRuns {
+            let width = Int(squareSize) * spaces[0].count
+            let height = Int(squareSize) * spaces.count
+            
+            animator = Animator(name: "13-last-cart", width: width, height: height, rate: "30")
+            animator?.drawBackground({ (ctx, canvas) in drawBackground(ctx: ctx, canvas: canvas, squareSize: squareSize) })
+        }
+        
         var run = 0
         var currentCarts = carts
         
@@ -232,6 +382,9 @@ class Course {
                 printTrack(carts: currentCarts)
                 print()
             }
+            
+            animator?.draw { (ctx, canvas) in drawCarts(ctx: ctx, canvas: canvas, squareSize: squareSize, carts: currentCarts) }
+            animator?.snap()
             
             // Sort the carts, move them, and pop off the collisions
             currentCarts.sort()
@@ -265,6 +418,9 @@ class Course {
             
             // Did we finish?
             if currentCarts.count == 1 {
+                animator?.finalize()
+                animator?.cleanup()
+                
                 return (x: currentCarts[0].x, y: currentCarts[0].y)
             }
             
@@ -371,10 +527,10 @@ class Course {
 }
 
 let course = Course(spaces: track, carts: carts)
-let firstCollision = course.firstCollision()
+course.drawRuns = true
 
+let firstCollision = course.firstCollision()
 print("First collision: \(firstCollision)")
 
 let lastCart = course.lastCart()
-
 print("Last cart: \(lastCart)")
