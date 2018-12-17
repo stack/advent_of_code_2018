@@ -17,7 +17,6 @@ public class LineReader {
         // If the buffer is empty, read more
         if buffer.isEmpty || readMore {
             let data = handle.readData(ofLength: ReadSize)
-            
             if data.count != 0 {
                 let value = String(data: data, encoding: .utf8)!
                 buffer += value
@@ -48,11 +47,7 @@ public class LineReader {
                 return readLine(readMore: true)
             }
         } else if results.count == 2 {
-            if results[1] == "\n" {
-                buffer = ""
-            } else {
-                buffer = String(results[1])
-            }
+            buffer = String(results[1])
             
             return String(results[0])
         } else {
