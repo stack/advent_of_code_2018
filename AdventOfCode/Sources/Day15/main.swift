@@ -4,7 +4,6 @@ import Utilities
 let ElfHP = 200
 let GoblinHP = 200
 
-let ElfAttack = 3
 let GoblinAttack = 3
 
 struct Point: Comparable, CustomStringConvertible, Equatable, Hashable {
@@ -62,12 +61,18 @@ class Cave {
     
     var nextID: Int
     var isOver: Bool
+    var elfDied: Bool
     
-    init() {
+    let elfAttackPower: Int
+    
+    init(elfAttackPower: Int) {
         spaces = []
         rounds = 0
         nextID = 1
         isOver = false
+        elfDied = false
+        
+        self.elfAttackPower = elfAttackPower
     }
     
     subscript(_ point: Point) -> Space {
@@ -358,13 +363,13 @@ class Cave {
                 fatalError("Somehow got a non-goblin during attack")
             }
             
-            let newEnemyHp = enemyHp - ElfAttack
+            let newEnemyHp = enemyHp - elfAttackPower
             
             if newEnemyHp > 0 {
                 // Swift.print("Elf @ \(point) attacks Goblin @ \(enemyPoint), \(enemyHp) -> \(newEnemyHp)")
                 self[enemyPoint] = .goblin(id: enemyId, hp: newEnemyHp)
             } else {
-                // Swift.print("Elf @ \(point) attacks Goblin @ \(enemyPoint), killing it!")
+                Swift.print("Elf @ \(point) attacks Goblin @ \(enemyPoint), killing it!")
                 self[enemyPoint] = .empty
             }
         }
@@ -397,14 +402,15 @@ class Cave {
                 // Swift.print("Goblin @ \(point) attacks Elf @ \(enemyPoint), \(enemyHp) -> \(newEnemyHp)")
                 self[enemyPoint] = .elf(id: enemyId, hp: newEnemyHp)
             } else {
-                // Swift.print("Goblin @ \(point) attacks Elf @ \(enemyPoint), killing it!")
+                Swift.print("Goblin @ \(point) attacks Elf @ \(enemyPoint), killing it!")
                 self[enemyPoint] = .empty
+                elfDied = true
             }
         }
     }
     
     func print() {
-        Swift.print("\nRound \(rounds):")
+        Swift.print("\nRound \(rounds), Elf Attack \(elfAttackPower):")
         
         for row in spaces {
             var hps: [String] = []
@@ -517,17 +523,54 @@ class Cave {
     }
 }
 
-// Build the cave
-let reader = LineReader(handle: FileHandle.standardInput)
-
-let cave = Cave()
-for line in reader {
-    cave.addSpaces(line: line)
+// Are we in part 1 or part 2
+enum Mode {
+    case part1
+    case part2
 }
 
-cave.print()
+let mode: Mode = (CommandLine.arguments.count > 1 && CommandLine.arguments[1] == "optimize") ? .part2 : .part1
 
-while !cave.isOver {
-    cave.nextRound()
+// Build the cave
+let reader = LineReader(handle: FileHandle.standardInput)
+let lines = reader.map { String($0) }
+
+if mode == .part1 {
+    let cave = Cave(elfAttackPower: 3)
+    for line in lines {
+        cave.addSpaces(line: line)
+    }
+    
     cave.print()
+    
+    while !cave.isOver {
+        cave.nextRound()
+        cave.print()
+    }
+} else {
+    var powerLevel = 4
+    
+    while true {
+        let cave = Cave(elfAttackPower: powerLevel)
+        for line in lines {
+            cave.addSpaces(line: line)
+        }
+        
+        cave.print()
+        
+        while true {
+            cave.nextRound()
+            cave.print()
+            
+            if cave.elfDied || cave.isOver {
+                break
+            }
+        }
+        
+        if cave.elfDied {
+            powerLevel += 1
+        } else {
+            break
+        }
+    }
 }
